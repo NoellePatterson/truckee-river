@@ -53,18 +53,24 @@ def import_USGS_flow():
     return flow_df
 
 def get_date_1000(flow_df, years):
-    # get calendar day of first day to reach 1000 cfs per year
+    # function returns calendar day of first day to reach 1000 cfs per year
 
     # create separate years column in df
     flow_df['years'] = years
     # append a marker for each year with day (since Jan 1) to reach 1000 cfs
     day1k = pd.DataFrame(np.unique(years), columns = ['year'])
-    day1k['day'] = np.zeros(len(day1k['year']))
-    for year_index in np.unique(years):
-        import pdb; pdb.set_trace()
-        days = flow_df['years' == year_index]
-        for day_index, day in enumerate(days):
-            if flow_df['flow_cfs'][index] > 1000:
+    day1k['day'] = np.empty(len(day1k['year']))
+    day1k['apr_q'] = np.empty(len(day1k['year']))
+    day1k['day'] = np.NaN
+    year_list = np.unique(years)
+    for year_index, year_val in enumerate(year_list):
+        days = flow_df['cfs_flow'][flow_df['years'] == year_val] # pull out flow for days in the given year
+        day_loc = days.index
+        day1k['apr_q'][year_index] = np.nanmean(days[80:90])
+        # import pdb; pdb.set_trace()
+        for day_index, day_flow in enumerate(days):
+            if day_flow > 1000:
                 day1k['day'][year_index] = day_index
+                break
     return(day1k)
 
